@@ -1,23 +1,32 @@
 package main 
 import (
-	"flag"
-	"log"
 	"net/http"
+	"fmt"
+	"log"
 )
-
-
-
-// func main() {
-//     fmt.Println("hello world")
+// func hello(w http.ResponseWriter, req *http.Request) {
+//     fmt.Fprintf(w, "Hello !!!!!!!!\n")
 // }
-var (
-	listen = flag.String("listen", ":8080", "listen address")
-	dir    = flag.String("dir", ".", "directory to serve")
-)
+
+// func main(){
+// 	http.HandleFunc("/hello", hello)
+// 	http.ListenAndServe(":8080", nil)
+// }
+
+const PORT = "8080"
 
 func main() {
-	flag.Parse()
-	log.Printf("listening on %q...", *listen)
-	err := http.ListenAndServe(*listen, http.FileServer(http.Dir(*dir)))
-	log.Fatalln(err)
+	http.HandleFunc("/", handler)
+	http.HandleFunc("/health-check", HealthCheckHandler)
+	fmt.Println("Server Web started on port", PORT)
+	log.Fatal(http.ListenAndServe(":"+PORT, nil))
+}
+
+func handler(w http.ResponseWriter, r *http.Request) {
+	fmt.Fprint(w, "Hello, World!")
+}
+func HealthCheckHandler(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusOK)
+	w.Header().Set("Content-Type", "application/json")
+	fmt.Fprint(w, `{"alive": true}`)
 }
